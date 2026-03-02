@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOKO EXDESTRO - Premium Top Up</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .animate-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-[#020617]">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Data Games
+        const GAMES = [
+            { id: 'mlbb', name: 'Mobile Legends', img: 'https://img.utdstc.com/icon/39a/02d/39a02d8479e0996c5e53303c73445761a29929887754d9241517865c697818e6:200', color: 'border-blue-500', category: 'MOBA', hasZone: true, placeholder: 'Contoh: 12345678', banner: '🔥 Promo Diamond Kuning' },
+            { id: 'ff', name: 'Free Fire', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_x_2SjEaYFvE-3x16kO7v6n_jH7u9F6n9vA&s', color: 'border-orange-500', category: 'Battle Royale', hasZone: false, placeholder: 'Masukkan Player ID', banner: '💎 Bonus 10% Diamond' },
+            { id: 'pubg', name: 'PUBG Mobile', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6-mX_vR7H1u-v0U9-9L6jL6R-1w5jG_zX5Q&s', color: 'border-yellow-500', category: 'Battle Royale', hasZone: false, placeholder: 'Masukkan Character ID', banner: '🍗 UC Termurah' },
+            { id: 'genshin', name: 'Genshin Impact', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTVR6xS1CgW1uXvXh6vC8lXp9p4xXp9p4xXp9p4xXp9p4x&s', color: 'border-indigo-500', category: 'RPG', hasZone: true, placeholder: 'Masukkan UID', banner: '🌑 Welkin Moon Ready' },
+            { id: 'val', name: 'Valorant', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7o6yX1CgW1uXvXh6vC8lXp9p4xXp9p4xXp9p4xXp9p4x&s', color: 'border-red-500', category: 'FPS', hasZone: false, placeholder: 'Riot ID (Contoh: User#123)', banner: '🔫 Points Instan' },
+            { id: 'roblox', name: 'Roblox', img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6-mX_vR7H1u-v0U9-9L6jL6R-1w5jG_zX5Q&s', color: 'border-slate-500', category: 'Sandbox', hasZone: false, placeholder: 'Username Roblox', banner: '💰 Robux Murah' },
+        ];
+
+        const PACKAGES = [
+            { id: 1, amount: '5 Diamonds', price: 1500, label: 'Rp 1.500' },
+            { id: 2, amount: '12 Diamonds', price: 3500, label: 'Rp 3.500' },
+            { id: 3, amount: '28 Diamonds', price: 8000, label: 'Rp 8.000' },
+            { id: 4, amount: '59 Diamonds', price: 16000, label: 'Rp 16.000' },
+            { id: 5, amount: '85 Diamonds', price: 23500, label: 'Rp 23.500' },
+            { id: 6, amount: '170 Diamonds', price: 46000, label: 'Rp 46.000' },
+            { id: 7, amount: '296 Diamonds', price: 81000, label: 'Rp 81.000' },
+            { id: 8, amount: '568 Diamonds', price: 153000, label: 'Rp 153.000' },
+            { id: 9, amount: '875 Diamonds', price: 235000, label: 'Rp 235.000' },
+            { id: 10, amount: '2010 Diamonds', price: 520000, label: 'Rp 520.000' },
+            { id: 11, amount: '4830 Diamonds', price: 1250000, label: 'Rp 1.250.000' },
+            { id: 12, amount: '9288 Diamonds', price: 2450000, label: 'Rp 2.450.000' },
+        ];
+
+        const PAYMENT_METHODS = [
+            { id: 'qris', name: 'QRIS', group: 'E-Wallet', fee: 0, icon: 'qr-code' },
+            { id: 'dana', name: 'DANA', group: 'E-Wallet', fee: 500, icon: 'smartphone' },
+            { id: 'ovo', name: 'OVO', group: 'E-Wallet', fee: 500, icon: 'smartphone' },
+            { id: 'gopay', name: 'GoPay', group: 'E-Wallet', fee: 500, icon: 'smartphone' },
+            { id: 'bca', name: 'BCA VA', group: 'Bank Transfer', fee: 2500, icon: 'building-2' },
+        ];
+
+        const App = () => {
+            const [step, setStep] = useState(1);
+            const [selectedGame, setSelectedGame] = useState(null);
+            const [selectedPackage, setSelectedPackage] = useState(null);
+            const [userId, setUserId] = useState('');
+            const [zoneId, setZoneId] = useState('');
+            const [loading, setLoading] = useState(false);
+            const [selectedPayment, setSelectedPayment] = useState(null);
+
+            const calculateTotal = () => {
+                if (!selectedPackage) return 0;
+                const payment = PAYMENT_METHODS.find(m => m.id === selectedPayment);
+                return selectedPackage.price + (payment ? payment.fee : 0);
+            };
+
+            const handleGameSelect = (game) => {
+                setSelectedGame(game);
+                setStep(2);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            const handleProcess = () => {
+                setLoading(true);
+                setTimeout(() => {
+                    setLoading(false);
+                    setStep(3);
+                }, 2000);
+            };
+
+            const reset = () => {
+                setStep(1);
+                setSelectedGame(null);
+                setSelectedPackage(null);
+                setSelectedPayment(null);
+                setUserId('');
+                setZoneId('');
+            };
+
+            return (
+                <div className="min-h-screen text-slate-200 pb-20">
+                    {/* Navbar */}
+                    <nav className="sticky top-0 z-50 bg-[#0f172a]/95 backdrop-blur-md border-b border-slate-800 p-4">
+                        <div className="max-w-6xl mx-auto flex items-center justify-between">
+                            <div className="flex items-center gap-3 cursor-pointer" onClick={reset}>
+                                <div className="bg-red-600 p-2 rounded-xl">
+                                    <i data-lucide="trophy" class="text-white w-6 h-6"></i>
+                                </div>
+                                <h1 className="text-xl font-black text-white italic tracking-tighter uppercase">TOKO <span className="text-red-500">EXDESTRO</span></h1>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <main className="max-w-6xl mx-auto p-4 md:p-8">
+                        {step === 1 && (
+                            <div className="animate-in">
+                                {/* Promo Hero */}
+                                <div className="mb-12 rounded-[2rem] bg-gradient-to-br from-red-600/20 to-slate-900 p-8 border border-white/5 shadow-2xl">
+                                    <h2 className="text-4xl md:text-6xl font-black text-white mb-4 leading-none italic uppercase">TURUN <span className="text-red-500">HARGA!</span></h2>
+                                    <p className="text-slate-400 mb-6 text-sm">Top Up Diamond Termurah se-Indonesia hanya di Exdestro.</p>
+                                    <button className="bg-white text-black px-8 py-3 rounded-xl font-bold text-xs uppercase">Belanja Sekarang</button>
+                                </div>
+
+                                <h3 className="text-xl font-black text-white uppercase italic mb-8 flex items-center gap-3">
+                                    <span className="w-1.5 h-6 bg-red-600 rounded-full"></span> Pilih Game
+                                </h3>
+
+                                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                    {GAMES.map(game => (
+                                        <div key={game.id} onClick={() => handleGameSelect(game)} className="bg-slate-900 border border-slate-800 rounded-[2rem] overflow-hidden hover:border-red-500 transition-all cursor-pointer group shadow-xl">
+                                            <div className="relative h-32 bg-slate-800">
+                                                <img src={game.img} className="w-full h-full object-cover" />
+                                            </div>
+                                            <div className="p-4">
+                                                <h4 className="font-black text-[10px] text-white uppercase">{game.name}</h4>
+                                                <p className="text-[8px] text-slate-500 uppercase">{game.category}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {step === 2 && (
+                            <div className="animate-in grid grid-cols-1 lg:grid-cols-12 gap-8">
+                                <div className="lg:col-span-4">
+                                    <div className="bg-slate-900 rounded-[2.5rem] p-8 border border-slate-800 sticky top-24 shadow-2xl text-center">
+                                        <button onClick={() => setStep(1)} className="text-[10px] font-black text-slate-500 mb-8 block uppercase tracking-widest"> Kembali </button>
+                                        <img src={selectedGame.img} className="w-24 h-24 rounded-3xl mx-auto mb-4 border-4 border-red-500" />
+                                        <h2 className="text-2xl font-black text-white uppercase italic">{selectedGame.name}</h2>
+                                        
+                                        <div className="mt-8 space-y-4 text-left">
+                                            <label className="text-[10px] font-black text-white uppercase tracking-widest">1. Masukkan ID</label>
+                                            <div className="flex gap-2">
+                                                <input type="text" placeholder={selectedGame.placeholder} className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-bold" value={userId} onChange={(e) => setUserId(e.target.value)} />
+                                                {selectedGame.hasZone && <input type="text" placeholder="Zone" className="w-20 bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-bold" value={zoneId} onChange={(e) => setZoneId(e.target.value)} />}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="lg:col-span-8 space-y-6">
+                                    <div className="bg-slate-900 rounded-[2.5rem] p-8 border border-slate-800 shadow-xl">
+                                        <label className="text-[10px] font-black text-white uppercase tracking-widest block mb-6">2. Pilih Nominal</label>
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                            {PACKAGES.map(pkg => (
+                                                <div key={pkg.id} onClick={() => setSelectedPackage(pkg)} className={`p-6 rounded-2xl border-2 cursor-pointer transition-all ${selectedPackage?.id === pkg.id ? 'border-red-500 bg-red-500/10' : 'border-slate-800 bg-slate-950/50'}`}>
+                                                    <p className="text-xs font-black text-white">{pkg.amount}</p>
+                                                    <p className="text-[10px] text-slate-500 font-bold">{pkg.label}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-slate-900 rounded-[2.5rem] p-8 border border-slate-800 shadow-xl">
+                                        <label className="text-[10px] font-black text-white uppercase tracking-widest block mb-6">3. Pembayaran</label>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            {PAYMENT_METHODS.map(m => (
+                                                <div key={m.id} onClick={() => setSelectedPayment(m.id)} className={`p-4 rounded-xl border-2 cursor-pointer flex justify-between items-center ${selectedPayment === m.id ? 'border-red-500 bg-red-500/10' : 'border-slate-800 bg-slate-950/50'}`}>
+                                                    <span className="text-[10px] font-black text-white uppercase">{m.name}</span>
+                                                    <span className="text-[10px] font-black text-red-500 italic">Rp {(selectedPackage?.price || 0) + m.fee}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-slate-900 p-8 rounded-[2rem] border border-red-600/30 flex justify-between items-center shadow-2xl">
+                                        <div>
+                                            <p className="text-[8px] font-bold text-slate-500 uppercase">Total Pembayaran</p>
+                                            <p className="text-2xl font-black text-white italic">Rp {calculateTotal().toLocaleString('id-ID')}</p>
+                                        </div>
+                                        <button 
+                                            onClick={handleProcess}
+                                            disabled={!userId || !selectedPackage || !selectedPayment || loading}
+                                            className="bg-red-600 text-white px-10 py-4 rounded-xl font-black text-xs uppercase shadow-lg shadow-red-600/30 disabled:opacity-20 transition-all active:scale-95"
+                                        >
+                                            {loading ? 'Proses...' : 'Beli Sekarang'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {step === 3 && (
+                            <div className="animate-in max-w-lg mx-auto bg-white rounded-[3rem] p-12 text-slate-900 text-center shadow-2xl">
+                                <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6 text-white">
+                                    <i data-lucide="check-circle-2" class="w-10 h-10"></i>
+                                </div>
+                                <h2 className="text-3xl font-black uppercase italic tracking-tighter mb-2">Berhasil!</h2>
+                                <p className="text-slate-500 text-xs font-bold mb-8">Pesanan kamu sedang diproses sistem otomatis.</p>
+                                <div className="bg-slate-50 p-6 rounded-2xl mb-8 space-y-3 text-left">
+                                    <div className="flex justify-between text-[10px] font-bold"><span className="text-slate-400">Game:</span><span>{selectedGame.name}</span></div>
+                                    <div className="flex justify-between text-[10px] font-bold"><span className="text-slate-400">Item:</span><span className="text-red-600">{selectedPackage.amount}</span></div>
+                                    <div className="flex justify-between text-[10px] font-bold"><span className="text-slate-400">ID:</span><span>{userId}</span></div>
+                                </div>
+                                <button onClick={reset} className="w-full bg-slate-950 text-white py-4 rounded-xl font-black text-xs uppercase">Selesai</button>
+                            </div>
+                        )}
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+
+        // Initialize Lucide Icons after render
+        setTimeout(() => {
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
